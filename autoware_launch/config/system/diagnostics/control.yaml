@@ -7,7 +7,9 @@ units:
       - { type: link, link: /autoware/control/node_alive_monitoring/command_gate }
       - { type: link, link: /autoware/control/emergency_braking }
       - { type: link, link: /autoware/control/performance_monitoring/lane_departure }
-      - { type: link, link: /autoware/control/performance_monitoring/control_state }
+      # Disabled for simple_trajectory_follower: it does not publish the "control_state" diagnostic
+      # (only autoware::...::Controller does), which otherwise goes STALE and blocks autonomous engage.
+      # - { type: link, link: /autoware/control/performance_monitoring/control_state }
 
   - path: /autoware/control/node_alive_monitoring/command_gate
     type: or
@@ -57,10 +59,11 @@ units:
     node: lane_departure_checker_node
     name: lane_departure
 
-  - path: /autoware/control/performance_monitoring/control_state
-    type: diag
-    node: controller_node_exe
-    name: control_state
+  # Disabled for simple_trajectory_follower (see note above).
+  # - path: /autoware/control/performance_monitoring/control_state
+  #   type: diag
+  #   node: controller_node_exe
+  #   name: control_state
 
   - path: /autoware/control/topic_rate_check/external_cmd_selector
     type: diag

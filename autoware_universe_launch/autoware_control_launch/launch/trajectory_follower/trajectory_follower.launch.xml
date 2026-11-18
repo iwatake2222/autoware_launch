@@ -1,9 +1,14 @@
 <launch>
   <!-- Trajectory follower unit: the controller and the lane departure checker that watches its predicted trajectory -->
-  <arg name="trajectory_follower_mode" default="trajectory_follower_node" description="options: `trajectory_follower_node`, `smart_mpc_trajectory_follower`, `none`"/>
+  <arg name="trajectory_follower_mode" default="trajectory_follower_node" description="options: `trajectory_follower_node`, `simple_trajectory_follower`, `smart_mpc_trajectory_follower`, `none`"/>
   <arg name="lateral_controller_mode" default="mpc" description="lateral controller; options: `mpc`, `pure_pursuit`"/>
   <arg name="longitudinal_controller_mode" default="pid" description="longitudinal controller; options: `pid`"/>
   <arg name="launch_lane_departure_checker" default="true"/>
+
+  <!-- simple_trajectory_follower parameters (used only when trajectory_follower_mode is `simple_trajectory_follower`) -->
+  <arg name="use_external_target_vel" default="true"/>
+  <arg name="external_target_vel" default="5.0"/>
+  <arg name="lateral_deviation" default="0.0"/>
 
   <!-- External interfaces -->
   <arg name="input/trajectory" default="/planning/trajectory"/>
@@ -53,6 +58,19 @@
         <param from="$(var lon_controller_param_path)"/>
         <param from="$(var lat_controller_param_path)"/>
         <param from="$(var vehicle_param_file)"/>
+        <extra_arg name="use_intra_process_comms" value="$(var use_intra_process)"/>
+      </composable_node>
+    </load_composable_node>
+  </group>
+
+  <!-- simple_trajectory_follower: lightweight linearized pure-pursuit + P controller -->
+  <group if="$(eval &quot;'$(var trajectory_follower_mode)' == 'simple_trajectory_follower'&quot;)">
+    <load_composable_node target="$(var target_container)">
+      <composable_node pkg="autoware_trajectory_follower_node" plugin="simple_trajectory_follower::SimpleTrajectoryFollower" name="controller_node_exe" namespace="trajectory_follower">
+        <remap from="~/input/kinematics" to="$(var input/odometry)"/>
+        <remap from="~/input/trajectory" to="$(var input/trajectory)"/>
+        <remap from="~/output/control_cmd" to="control_cmd"/>
+        <param from="$(find-pkg-share autoware_trajectory_follower_node)/config/simple_trajectory_follower.param.yaml" allow_substs="true"/>
         <extra_arg name="use_intra_process_comms" value="$(var use_intra_process)"/>
       </composable_node>
     </load_composable_node>

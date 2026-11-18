@@ -2,8 +2,9 @@ launch:
   # controller
   - arg:
       name: trajectory_follower_mode
-      default: trajectory_follower_node
+      default: simple_trajectory_follower
       # option: trajectory_follower_node
+      #         simple_trajectory_follower
       #         smart_mpc_trajectory_follower
       #         none
 
